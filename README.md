@@ -168,3 +168,6 @@ pytest -q
 
 ## Contributing, security, license
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and [LICENSE](LICENSE) (MIT).
+=======
+Full-stack Flask app for detecting deepfake videos of human faces. Combines a ResNet-18 + BiLSTM (CNN-LSTM) model with a pretrained ViT classifier and an offline classical-CV baseline fallback. Includes auth, upload, per-frame analysis, training pipeline, Docker and Render deployment.
+>>>>>>> 40cae809b86c18c2879706b0ae62242e5b86ffd2
