@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} — DeepfakeDetector{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align:center; padding:60px 30px;">
+  <h1 style="font-size:3rem; margin-bottom:10px;">{{ code }}</h1>
+  <p style="color:var(--text-muted); margin-bottom:24px;">{{ message }}</p>
+  <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+</div>
+{% endblock %}

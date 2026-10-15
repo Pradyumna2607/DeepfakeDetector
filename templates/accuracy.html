@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Model Accuracy — DeepfakeDetector{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Model Performance</h2>
+
+<div class="card">
+  <p>
+    <strong>Active inference method:</strong>
+    {{ metrics.method_label }}
+  </p>
+
+  {% if metrics.method == 'cnn_lstm' and metrics.best_val_acc %}
+    <p><strong>Best validation accuracy:</strong> {{ (metrics.best_val_acc * 100) | round(2) }}%</p>
+    {% if metrics.best_val_f1 %}<p><strong>Best validation F1 score:</strong> {{ (metrics.best_val_f1 * 100) | round(2) }}%</p>{% endif %}
+    <p><strong>Trained at:</strong> {{ metrics.trained_at }}</p>
+    {% if metrics.dataset_size %}
+    <p><strong>Trained on:</strong> {{ metrics.dataset_size.real }} real + {{ metrics.dataset_size.fake }} fake videos
+      ({{ metrics.dataset_size.real + metrics.dataset_size.fake }} total)</p>
+    {% endif %}
+
+    <h3 style="margin-top:30px;">Training History</h3>
+    <table class="history-table">
+      <thead>
+        <tr><th>Epoch</th><th>Train Loss</th><th>Train Acc</th><th>Val Acc</th><th>Val Precision</th><th>Val Recall</th><th>Val F1</th></tr>
+      </thead>
+      <tbody>
+      {% for row in metrics.history %}
+        <tr>
+          <td>{{ row.epoch }}</td>
+          <td>{{ row.train_loss | round(4) }}</td>
+          <td>{{ (row.train_acc*100) | round(2) }}%</td>
+          <td>{{ (row.val_acc*100) | round(2) }}%</td>
+          <td>{{ (row.val_precision*100) | round(2) if row.val_precision is defined else '—' }}%</td>
+          <td>{{ (row.val_recall*100) | round(2) if row.val_recall is defined else '—' }}%</td>
+          <td>{{ (row.val_f1*100) | round(2) if row.val_f1 is defined else '—' }}%</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p style="color:var(--text-muted); font-size:0.85rem; margin-top:12px;">
+      F1 score (not raw accuracy) is used to pick the "best" checkpoint, since
+      accuracy alone can be misleading on imbalanced real/fake datasets.
+    </p>
+  {% else %}
+    <div class="alert alert-info">
+      {{ metrics.note }}
+    </div>
+    <p style="color:var(--text-muted);">
+      Three-tier fallback (highest quality first):
+    </p>
+    <ol style="color:var(--text-muted); line-height:1.8;">
+      <li><strong>Trained CNN-LSTM</strong> (your own model, matches project report) — see below</li>
+      <li><strong>Pretrained Vision Transformer</strong> (Hugging Face, no training needed) —
+        <code>pip install transformers</code> + internet connection once</li>
+      <li><strong>Classical-CV heuristic baseline</strong> (always available, fully offline)</li>
+    </ol>
+    <p style="color:var(--text-muted); margin-top:20px;"><strong>To train your own CNN-LSTM (recommended for real accuracy):</strong></p>
+    <pre style="white-space:pre-wrap;">
+1. Download one or more labeled datasets (e.g. Kaggle DFDC sample set)
+2. Sort each one into data/real/ and data/fake/:
+   python prepare_dataset.py --source-dir ./downloads/dfdc_sample --metadata metadata.json
+3. Repeat step 2 for additional datasets (--prefix to avoid filename clashes)
+   -- everything merges into the same data/real and data/fake folders
+4. python train.py --data-root ./data --epochs 15 --batch-size 4
+5. Restart the Flask app — it auto-detects saved_models/deepfake_cnn_lstm.pt
+    </pre>
+    <p style="color:var(--text-muted); font-size:0.85rem;">
+      train.py automatically handles class imbalance (common in these
+      datasets) and reports precision/recall/F1, not just accuracy.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

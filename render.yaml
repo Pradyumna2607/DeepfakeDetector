@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: deepfake-detector
+    runtime: docker
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PORT
+        value: 8000
+    disk:
+      name: deepfake-data
+      mountPath: /app/static/uploads
+      sizeGB: 1

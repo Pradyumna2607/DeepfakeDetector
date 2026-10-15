@@ -1,0 +1,38 @@
+# Core web framework
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Werkzeug
+
+# Computer vision (frame & face extraction, heuristic baseline)
+# NOTE: pinned to 4.10.0.84 specifically -- newer opencv-python releases
+# (5.0.0.93 and some 4.13.x builds) have shipped with broken/incomplete
+# cv2.CascadeClassifier bindings on some platforms. 4.10.0.84 is confirmed
+# working, including on Python 3.13.
+opencv-python==4.10.0.84
+numpy
+
+# Deep learning (CNN-LSTM model) -- optional but required to move beyond
+# the classical-CV heuristic baseline. CPU-only install shown; swap for a
+# CUDA build from pytorch.org if you have an NVIDIA GPU.
+torch
+torchvision
+
+# MTCNN face detector (much more accurate than the OpenCV Haar Cascade
+# fallback). Automatically used if installed; the app still works with
+# just OpenCV (Haar Cascade fallback) if you skip this.
+facenet-pytorch
+
+# Pretrained deepfake image classifier (Hugging Face) -- gives genuinely
+# learned predictions with zero training/dataset work on your part.
+# First run downloads model weights (~300MB) and caches them locally;
+# needs an internet connection once. The app still works with just the
+# classical-CV heuristic if you skip this.
+transformers
+
+# Production WSGI server (used by Dockerfile / Procfile / gunicorn deploys)
+gunicorn
+
+# Uncomment if you attach a hosted Postgres database (Render/Railway/Heroku)
+# instead of the default local SQLite file:
+# psycopg2-binary

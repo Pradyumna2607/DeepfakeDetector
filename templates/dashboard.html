@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — DeepfakeDetector{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Your Detection History</h2>
+<p class="section-subtitle">Last 20 analyses, most recent first.</p>
+
+<div class="card">
+  {% if history %}
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Filename</th>
+        <th>Prediction</th>
+        <th>Confidence</th>
+        <th>Faces</th>
+        <th>Method</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in history %}
+      <tr>
+        <td>{{ row.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+        <td>{{ row.original_filename }}</td>
+        <td>
+          {% if row.prediction == 'FAKE' %}
+            <span class="badge badge-fake">FAKE</span>
+          {% elif row.prediction == 'REAL' %}
+            <span class="badge badge-real">REAL</span>
+          {% elif row.prediction == 'UNCERTAIN' %}
+            <span class="badge badge-unknown">UNCERTAIN</span>
+          {% else %}
+            <span class="badge badge-unknown">UNKNOWN</span>
+          {% endif %}
+        </td>
+        <td>{{ row.confidence | round(1) }}%</td>
+        <td>{{ row.faces_detected }}</td>
+        <td>
+          {% if row.method == 'cnn_lstm' %}CNN-LSTM
+          {% elif row.method == 'ensemble' %}Ensemble
+          {% elif row.method == 'pretrained_vit' %}Pretrained ViT
+          {% else %}Heuristic
+          {% endif %}
+        </td>
+        <td><a href="{{ url_for('result', job_id=row.job_id) }}">View →</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--text-muted);">No analyses yet. <a href="{{ url_for('upload') }}">Upload your first video</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}

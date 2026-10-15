@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+instance/*.db
+static/uploads/*
+static/results/*
+saved_models/*.pt
+data/real/*
+data/fake/*
+.git/
+.venv/
+venv/
+*.log

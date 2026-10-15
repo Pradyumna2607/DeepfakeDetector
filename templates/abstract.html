@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Abstract — DeepfakeDetector{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Project Abstract</h2>
+<div class="card">
+  <p>
+    The rapid increase in deepfake videos and images has raised the urgent need for
+    effective detection methods to counter misinformation and malicious content.
+    Deepfakes, created using advanced AI, produce highly realistic synthetic media,
+    making it difficult to distinguish between authentic and manipulated content,
+    posing threats to media authenticity and public trust.
+  </p>
+  <p>
+    This project develops a deepfake detection system that combines
+    <strong>Convolutional Neural Networks (CNNs)</strong> and
+    <strong>Recurrent Neural Networks (RNNs)</strong>, specifically
+    <strong>Long Short-Term Memory (LSTM)</strong> networks, to enhance detection
+    accuracy. CNNs extract spatial features from video frames, while LSTMs capture
+    temporal dependencies across the frame sequence — together forming a hybrid
+    architecture capable of catching both single-frame artifacts and unnatural
+    motion over time.
+  </p>
+  <p>
+    Transfer learning further improves model performance by pre-training the CNN
+    backbone on large datasets before fine-tuning on deepfake-specific data. The
+    system analyzes spatial and temporal patterns to detect anomalies across
+    diverse conditions such as lighting, resolution, and facial pose. Regularization
+    (dropout) and data augmentation address overfitting and adversarial robustness,
+    and standard evaluation metrics (accuracy, precision, recall, F1, ROC-AUC)
+    assess system effectiveness.
+  </p>
+  <p style="margin-bottom:0;">
+    This implementation ships as a complete, working full-stack application: a
+    Flask backend orchestrates video upload, OpenCV-based frame/face extraction,
+    and model inference; a PyTorch CNN-LSTM model (trainable via <code>train.py</code>)
+    provides the deep-learning classifier; and when no trained checkpoint is present
+    yet, an explainable classical-CV heuristic baseline (frequency analysis,
+    sharpness, texture entropy) keeps the system fully functional out of the box.
+  </p>
+</div>
+
+<h2 class="section-title" style="margin-top:40px;">System Architecture</h2>
+<div class="card">
+  <pre style="white-space:pre-wrap; background:none; color:var(--text-main); font-size:0.85rem; line-height:1.7;">
+Uploaded Video
+      │
+      ▼
+Frame Sampling (uniform, N frames)  ──▶  utils/face_extraction.py
+      │
+      ▼
+Face Detection & Cropping (OpenCV Haar Cascade)
+      │
+      ▼
+   ┌──────────────────────────────┐
+   │  Trained checkpoint exists?  │
+   └───────────┬───────────┬──────┘
+          Yes  │           │  No
+               ▼           ▼
+   CNN Encoder (ResNet-18)   Heuristic Baseline
+        │                    (sharpness / FFT /
+        ▼                     texture / temporal)
+   LSTM Temporal Model
+        │
+        ▼
+   Fully-Connected Classifier
+        │
+        ▼
+   Prediction: REAL / FAKE  +  Confidence %
+        │
+        ▼
+   Result Dashboard (frames, faces, per-frame chart)
+  </pre>
+</div>
+{% endblock %}

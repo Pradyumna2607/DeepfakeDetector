@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Detection Result — DeepfakeDetector{% endblock %}
+
+{% block content %}
+{% set verdict_class = 'fake' if record.prediction == 'FAKE' else ('real' if record.prediction == 'REAL' else 'unknown') %}
+
+<div class="result-banner {{ verdict_class }}">
+  <div>
+    <p style="color:var(--text-muted); margin:0 0 6px; font-size:0.85rem;">
+      {{ record.original_filename }} &middot; analyzed with
+      <strong>
+        {% if record.method == 'cnn_lstm' %}your trained CNN-LSTM model
+        {% elif record.method == 'ensemble' %}an ensemble of the pretrained ViT + classical-CV heuristic
+        {% elif record.method == 'pretrained_vit' %}a pretrained Vision Transformer (Hugging Face)
+        {% else %}the classical-CV heuristic baseline
+        {% endif %}
+      </strong>
+    </p>
+    <div class="verdict">
+      {% if record.prediction == 'FAKE' %} ⚠ DEEPFAKE DETECTED
+      {% elif record.prediction == 'REAL' %} ✓ AUTHENTIC VIDEO
+      {% elif record.prediction == 'UNCERTAIN' %} ⚠ RESULT UNCERTAIN — BORDERLINE
+      {% else %} ? INCONCLUSIVE — NO FACE DETECTED
+      {% endif %}
+    </div>
+    {% if record.prediction == 'UNCERTAIN' %}
+    <p style="color:var(--text-muted); margin-top:8px; max-width:480px;">
+      The model's internal score for this video was too close to the
+      50/50 boundary to call confidently in either direction. Rather than
+      force a guess, the system is flagging this as borderline — treat it
+      as "needs human review," not as a REAL or FAKE verdict.
+    </p>
+    {% endif %}
+    <p style="color:var(--text-muted); margin-top:8px;">
+      {{ record.faces_detected }} face(s) detected across sampled frames.
+    </p>
+  </div>
+  <div class="confidence-ring" style="border-color:
+      {{ '#ff4d6d' if verdict_class=='fake' else ('#2dd4bf' if verdict_class=='real' else '#fbbf24') }};">
+    {{ record.confidence | round(1) }}%
+  </div>
+</div>
+
+{% if per_frame_scores %}
+<div class="card">
+  <h3 style="margin-top:0;">Per-Frame Suspicion Score</h3>
+  <p style="color:var(--text-muted); font-size:0.88rem;">
+    Higher bars indicate frames with stronger manipulation indicators
+    (lower sharpness, suppressed high-frequency detail, texture irregularity,
+    or temporal inconsistency).
+  </p>
+  <div style="display:flex; align-items:flex-end; gap:6px; height:120px; margin-top:20px;">
+    {% for score in per_frame_scores %}
+      <div title="Frame {{ loop.index0 }}: {{ (score*100) | round(1) }}%"
+           style="flex:1; background: linear-gradient(180deg, {{ '#ff4d6d' if score >= 0.5 else '#2dd4bf' }}, transparent);
+                  height: {{ (score*100) | round(0) }}%; min-height:4px; border-radius:4px 4px 0 0;">
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if record.method == 'ensemble' %}
+<div class="card">
+  <h3 style="margin-top:0;">Ensemble Breakdown</h3>
+  <p style="color:var(--text-muted); font-size:0.88rem;">
+    This verdict blends two independent signals (70% pretrained model,
+    30% heuristic) rather than relying on either alone. If the two
+    disagree significantly, that's worth noting — it usually means the
+    video sits in a genuinely ambiguous or hard-to-classify zone.
+  </p>
+  {% if feature_summary and feature_summary.get('pretrained_fake_probability') is not none %}
+  <table class="history-table" style="margin-top:16px;">
+    <thead><tr><th>Signal</th><th>Fake Probability</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Pretrained Vision Transformer</td>
+        <td>{{ (feature_summary.pretrained_fake_probability * 100) | round(1) }}%</td>
+      </tr>
+      {% if feature_summary.get('heuristic_fake_probability') is not none %}
+      <tr>
+        <td>Classical-CV Heuristic</td>
+        <td>{{ (feature_summary.heuristic_fake_probability * 100) | round(1) }}%</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if frame_files %}
+<div class="gallery-title">Extracted Frames</div>
+<div class="gallery-scroll">
+  {% for f in frame_files %}
+    <img src="{{ url_for('static', filename='results/' + job_id + '/' + f) }}" alt="Extracted frame">
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if face_files %}
+<div class="gallery-title">Extracted Faces</div>
+<div class="gallery-scroll">
+  {% for f in face_files %}
+    <img src="{{ url_for('static', filename='results/' + job_id + '/' + f) }}" alt="Extracted face">
+  {% endfor %}
+</div>
+{% endif %}
+
+<div style="margin-top:36px; display:flex; gap:14px;">
+  <a href="{{ url_for('upload') }}" class="btn btn-primary">Analyze Another Video</a>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-outline">View History</a>
+</div>
+{% endblock %}

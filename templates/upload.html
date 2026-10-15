@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Analyze Video — DeepfakeDetector{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Upload a video for analysis</h2>
+<p class="section-subtitle">
+  Supported formats: MP4, AVI, MOV, MKV, WEBM &middot; Max size 200MB
+</p>
+
+<div class="card">
+  <form id="upload-form" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+    <div class="upload-box" id="upload-box">
+      <div class="upload-icon">📤</div>
+      <h3>Drag &amp; drop your video here</h3>
+      <p style="color:var(--text-muted); margin: 6px 0 0;">or click to browse your files</p>
+      <div id="file-name"></div>
+      <input type="file" id="video-input" name="video" accept="video/*" required>
+    </div>
+
+    <div class="progress-wrapper" id="progress-wrapper">
+      <p style="color:var(--text-muted); margin-bottom:8px;">
+        Processing: extracting frames → detecting faces → running CNN-LSTM analysis...
+      </p>
+      <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+    </div>
+
+    <div style="margin-top: 28px;">
+      <button type="submit" class="btn btn-primary btn-block" id="submit-btn">Upload &amp; Analyze</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

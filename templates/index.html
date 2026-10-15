@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}DeepfakeDetector — AI-Powered Deepfake Video Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="pill">Hybrid CNN + LSTM Architecture</div>
+  <h1>Deep Fake Face Detection<br>using Artificial Intelligence</h1>
+  <p>
+    Upload any video and our system extracts frames, isolates faces, and analyzes
+    spatial &amp; temporal inconsistencies to determine whether the content is
+    <strong>REAL</strong> or a <strong>DEEPFAKE</strong> — with a transparent
+    confidence score.
+  </p>
+  <div class="hero-actions">
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('upload') }}" class="btn btn-primary">Analyze a Video →</a>
+    {% else %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started Free</a>
+      <a href="{{ url_for('login') }}" class="btn btn-outline">Login</a>
+    {% endif %}
+  </div>
+</section>
+
+<section>
+  <div class="grid-3">
+    <div class="feature-card">
+      <div class="icon">🎞️</div>
+      <h3>Frame &amp; Face Extraction</h3>
+      <p>Frames are uniformly sampled from the uploaded video and each face is
+      detected and cropped for focused analysis, exactly as demonstrated in
+      the project's Extracted Frames / Extracted Faces gallery.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🧠</div>
+      <h3>CNN Spatial Analysis</h3>
+      <p>A Convolutional Neural Network (ResNet-based encoder) captures
+      spatial inconsistencies — texture, lighting, and artifact cues — within
+      each individual frame.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⏱️</div>
+      <h3>LSTM Temporal Analysis</h3>
+      <p>An LSTM network analyzes the sequence of frame-level features to
+      catch unnatural transitions across time that no single frame reveals
+      on its own.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔄</div>
+      <h3>Transfer Learning</h3>
+      <p>The CNN backbone can be pre-trained on large-scale datasets and
+      fine-tuned on deepfake-specific data for faster convergence and better
+      generalization.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🛡️</div>
+      <h3>Adversarial Robustness</h3>
+      <p>The training pipeline supports adversarial-example augmentation so
+      the model stays reliable even against inputs crafted to fool it.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h3>Explainable Results</h3>
+      <p>Every prediction ships with a confidence score, per-frame
+      suspicion chart, and the extracted evidence images — no black-box
+      verdicts.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
